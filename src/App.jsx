@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 
+// 恢復原始步驟
 const steps = [
   "前端：使用者點擊按鈕",
   "前端：資料被打包成請求",
@@ -30,6 +31,65 @@ const developerDayActivities = [
   },
 ];
 
+// 正經的日程表
+const formalDeveloperSchedule = [
+  {
+    time: "09:00",
+    activity: "開始工作",
+    description: "閱讀郵件、規劃今日任務、設定優先順序",
+    icon: "📆",
+  },
+  {
+    time: "09:30",
+    activity: "晨會",
+    description: "與團隊討論項目進度、協調工作分配",
+    icon: "👥",
+  },
+  {
+    time: "10:00",
+    activity: "核心開發時間",
+    description: "專注撰寫程式碼、實現產品功能",
+    icon: "💻",
+  },
+  {
+    time: "12:00",
+    activity: "午餐時間",
+    description: "休息、補充能量",
+    icon: "🍽️",
+  },
+  {
+    time: "13:00",
+    activity: "程式碼審核",
+    description: "審查團隊成員提交的代碼、提供反饋建議",
+    icon: "🔍",
+  },
+  {
+    time: "14:30",
+    activity: "持續開發",
+    description: "處理技術難題、優化程式碼效能",
+    icon: "⚙️",
+  },
+  {
+    time: "16:00",
+    activity: "團隊協作",
+    description: "與設計師、產品經理協調需求細節",
+    icon: "🤝",
+  },
+  {
+    time: "17:30",
+    activity: "總結與計劃",
+    description: "記錄今日完成項目、準備明日工作",
+    icon: "✅",
+  },
+  {
+    time: "18:00",
+    activity: "下班",
+    description: "結束一天的工作",
+    icon: "🏠",
+  },
+];
+
+// 真實的日程表
 const realDeveloperSchedule = [
   {
     time: "09:00",
@@ -69,7 +129,7 @@ const realDeveloperSchedule = [
     time: "13:30",
     activity: "偷懶時間",
     description:
-      "工作到一半突然開始瀏覽機票網站，計劃下一個假期。「這個峇里島的度假村看起來不錯...」同時保持Teams狀態為「忙碌中」。",
+      "工作到一半突然開始瀏覽機票網站，計劃下一個假期。「這個石垣島的度假村看起來不錯...」同時保持Slack狀態為「忙碌中」。",
     icon: "✈️",
     highlight: true,
   },
@@ -148,15 +208,37 @@ const webTeamRoles = [
   },
 ];
 
+const codeExamples = [
+  {
+    name: "Hello World",
+    code: 'console.log("Hello World!");',
+  },
+  {
+    name: "簡單計算",
+    code: "const a = 10;\nconst b = 5;\nconsole.log(`a + b = ${a + b}`);\nconsole.log(`a - b = ${a - b}`);\nconsole.log(`a * b = ${a * b}`);\nconsole.log(`a / b = ${a / b}`);",
+  },
+  {
+    name: "簡單迴圈",
+    code: "for (let i = 1; i <= 5; i++) {\n  console.log(`第 ${i} 次迭代`);\n}",
+  },
+  {
+    name: "陣列操作",
+    code: "const fruits = ['蘋果', '香蕉', '橘子'];\nfruits.forEach(fruit => {\n  console.log(`我喜歡吃 ${fruit}`);\n});",
+  },
+];
+
 export default function App() {
   const [currentStep, setCurrentStep] = useState(-1);
   const [done, setDone] = useState(false);
-  const [code, setCode] = useState(
-    "// 輸入JavaScript程式碼\n// 例如: console.log('Hello World!');\n// 或是: 2 + 2"
-  );
+  const [code, setCode] = useState("");
   const [output, setOutput] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [showRealDay, setShowRealDay] = useState(false);
+  const [showCodeExamples, setShowCodeExamples] = useState(false);
+  const [scheduleMode, setScheduleMode] = useState("formal"); // "formal" 或 "real"
+
+  // 建立一個ref用於滾動到日程表位置
+  const scheduleRef = useRef(null);
 
   const handleClick = async () => {
     setCurrentStep(0);
@@ -169,14 +251,24 @@ export default function App() {
     setDone(true);
   };
 
+  // 切換到真實日程模式並滾動到日程表區域
+  const showRealSchedule = () => {
+    setScheduleMode("formal");
+    // 滾動到日程表位置
+    if (scheduleRef.current) {
+      scheduleRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }
+  };
+
   const runCode = () => {
     setIsProcessing(true);
     setOutput("");
 
-    // 使用setTimeout模擬程式碼處理時間
     setTimeout(() => {
       try {
-        // 捕獲console.log輸出
         const originalConsoleLog = console.log;
         let logs = [];
 
@@ -185,13 +277,10 @@ export default function App() {
           originalConsoleLog(...args);
         };
 
-        // 執行程式碼並取得結果
         const result = eval(code);
 
-        // 恢復console.log
         console.log = originalConsoleLog;
 
-        // 顯示結果
         setOutput(
           logs.length > 0
             ? logs.join("\n") +
@@ -206,6 +295,14 @@ export default function App() {
       setIsProcessing(false);
     }, 800);
   };
+
+  const toggleScheduleMode = () => {
+    setScheduleMode(scheduleMode === "formal" ? "real" : "formal");
+  };
+
+  // 基於當前模式選擇顯示的日程表
+  const currentSchedule =
+    scheduleMode === "formal" ? formalDeveloperSchedule : realDeveloperSchedule;
 
   return (
     <div className="min-h-screen bg-gray-950 text-white flex flex-col items-center justify-center p-6">
@@ -241,79 +338,75 @@ export default function App() {
             </motion.div>
           ))}
         </div>
+      </div>
 
-        <div className="mt-8 mb-4">
-          <button
-            onClick={() => setShowRealDay(!showRealDay)}
-            className="flex items-center justify-center w-full py-3 px-4 bg-purple-700 hover:bg-purple-600 rounded-lg text-white font-medium transition duration-300"
-          >
-            <span className="mr-2">
-              {showRealDay ? "隱藏真相" : "揭露真正的軟體工程師的一天"}
-            </span>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className={`h-5 w-5 transition-transform duration-300 ${
-                showRealDay ? "rotate-180" : ""
-              }`}
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
-              <path
-                fillRule="evenodd"
-                d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                clipRule="evenodd"
-              />
-            </svg>
-          </button>
+      {/* 軟體工程師日程表 */}
+      <div
+        className="w-full max-w-4xl mb-12 border-t border-gray-700 pt-8"
+        ref={scheduleRef}
+      >
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-3xl font-bold text-cyan-400">
+            軟體工程師的日程表
+          </h2>
         </div>
 
-        <motion.div
-          className="bg-gray-800 rounded-lg overflow-hidden"
-          initial={{ opacity: 0, height: 0 }}
-          animate={{
-            opacity: showRealDay ? 1 : 0,
-            height: showRealDay ? "auto" : 0,
-          }}
-          transition={{ duration: 0.5 }}
-        >
-          <div className="p-6">
-            <h3 className="text-2xl font-bold text-purple-400 mb-6">
-              軟體工程師的真實日程表
-            </h3>
-            <div className="space-y-6">
-              {realDeveloperSchedule.map((item, index) => (
-                <motion.div
-                  key={index}
-                  className="flex"
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: showRealDay ? 1 : 0, x: 0 }}
-                  transition={{ duration: 0.3, delay: index * 0.1 }}
-                >
-                  <div className="flex-shrink-0 w-16 text-center">
-                    <div className="text-2xl mb-1">{item.icon}</div>
-                    <div className="text-gray-400 font-mono">{item.time}</div>
-                  </div>
-                  <div className="ml-4 flex-1">
-                    <div
-                      className={`h-full border-l-2 ${
-                        item.highlight ? "border-pink-500" : "border-purple-500"
-                      } pl-4`}
+        <div className="bg-gray-800 rounded-lg overflow-hidden p-6">
+          <div className="space-y-6">
+            {currentSchedule.map((item, index) => (
+              <motion.div
+                key={index}
+                className="flex"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.3, delay: index * 0.1 }}
+              >
+                <div className="flex-shrink-0 w-16 text-center">
+                  <div className="text-2xl mb-1">{item.icon}</div>
+                  <div className="text-gray-400 font-mono">{item.time}</div>
+                </div>
+                <div className="ml-4 flex-1">
+                  <div
+                    className={`h-full border-l-2 ${
+                      scheduleMode === "real" && item.highlight
+                        ? "border-pink-500"
+                        : scheduleMode === "real"
+                        ? "border-purple-500"
+                        : "border-cyan-500"
+                    } pl-4`}
+                  >
+                    <h4
+                      className={`text-lg font-semibold ${
+                        scheduleMode === "real" && item.highlight
+                          ? "text-pink-300"
+                          : scheduleMode === "real"
+                          ? "text-purple-300"
+                          : "text-cyan-300"
+                      }`}
                     >
-                      <h4
-                        className={`text-lg font-semibold ${
-                          item.highlight ? "text-pink-300" : "text-purple-300"
-                        }`}
-                      >
-                        {item.activity}
-                      </h4>
-                      <p className="text-gray-300 mt-1">{item.description}</p>
-                    </div>
+                      {item.activity}
+                    </h4>
+                    <p className="text-gray-300 mt-1">{item.description}</p>
                   </div>
-                </motion.div>
-              ))}
-            </div>
+                </div>
+              </motion.div>
+            ))}
           </div>
-        </motion.div>
+        </div>
+        <div className="flex justify-center mt-6 mb-4">
+          <button
+            onClick={toggleScheduleMode}
+            className={`px-6 py-3 rounded-lg text-white font-medium transition-colors duration-300 ${
+              scheduleMode === "formal"
+                ? "bg-purple-600 hover:bg-purple-500"
+                : "bg-pink-600 hover:bg-pink-500"
+            }`}
+          >
+            {scheduleMode === "formal"
+              ? "我知道你想看的不是這個"
+              : "返回正經版本"}
+          </button>
+        </div>
       </div>
 
       <div className="w-full max-w-4xl mb-12 border-t border-gray-700 pt-8">
@@ -352,7 +445,14 @@ export default function App() {
                     }`}
                   >
                     {role.title}
-                    {role.highlight && <span className="ml-2">👈 這是我!</span>}
+                    {role.highlight && (
+                      <span
+                        className="ml-2 cursor-pointer hover:text-yellow-300 transition-colors"
+                        onClick={showRealSchedule}
+                      >
+                        👈 這是我!
+                      </span>
+                    )}
                   </h3>
                   <p className="text-gray-300">{role.description}</p>
                 </div>
@@ -412,10 +512,39 @@ export default function App() {
           體驗軟體工程師的工作
         </h2>
         <div className="mb-4">
-          <label className="block text-gray-300 mb-2">輸入程式碼:</label>
+          <label className="block text-gray-300 mb-2 flex justify-between items-center">
+            <span>輸入程式碼:</span>
+            <button
+              onClick={() => setShowCodeExamples(!showCodeExamples)}
+              className="text-sm text-cyan-400 hover:text-cyan-300"
+            >
+              {showCodeExamples ? "隱藏範例" : "顯示範例"}
+            </button>
+          </label>
+
+          {showCodeExamples && (
+            <motion.div
+              className="flex flex-wrap gap-2 mb-4"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              transition={{ duration: 0.3 }}
+            >
+              {codeExamples.map((example, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCode(example.code)}
+                  className="px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded text-sm text-white"
+                >
+                  {example.name}
+                </button>
+              ))}
+            </motion.div>
+          )}
+
           <textarea
             value={code}
             onChange={(e) => setCode(e.target.value)}
+            placeholder="// 在此輸入JavaScript程式碼"
             className="w-full bg-gray-800 text-white p-4 rounded-md border border-gray-700 font-mono h-40"
             spellCheck="false"
           />
