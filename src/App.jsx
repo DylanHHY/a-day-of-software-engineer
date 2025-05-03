@@ -52,10 +52,26 @@ const realDeveloperSchedule = [
     icon: "🐛",
   },
   {
+    time: "11:15",
+    activity: "啟動AI小助手",
+    description:
+      "遇到複雜問題？寫文檔？生成測試案例？直接丟給AI小助手處理，自己去喝杯水休息一下。「有AI為何要自己寫？」",
+    icon: "🤖",
+    highlight: true,
+  },
+  {
     time: "12:00",
     activity: "午餐休息",
     description: "與同事一起享用午餐，討論技術難題或是最新的科技新聞。",
     icon: "🍱",
+  },
+  {
+    time: "13:30",
+    activity: "偷懶時間",
+    description:
+      "工作到一半突然開始瀏覽機票網站，計劃下一個假期。「這個峇里島的度假村看起來不錯...」同時保持Teams狀態為「忙碌中」。",
+    icon: "✈️",
+    highlight: true,
   },
   {
     time: "14:00",
@@ -64,21 +80,38 @@ const realDeveloperSchedule = [
     icon: "🍪",
   },
   {
+    time: "14:30",
+    activity: "假裝在工作",
+    description:
+      "快速切換螢幕，從YouTube轉回IDE，因為老闆突然走過來了。一臉認真地盯著那段三小時前就寫好的程式碼。",
+    icon: "👀",
+    highlight: true,
+  },
+  {
     time: "15:00",
     activity: "會議時間",
-    description: "參加各種會議：站會、需求討論、技術評審...",
+    description:
+      "參加各種會議：站會、需求討論、技術評審...同時在背景開著AI幫你生成會議摘要和待辦事項。",
     icon: "👥",
   },
   {
-    time: "16:30",
+    time: "16:00",
     activity: "深度工作",
     description: "戴上耳機，進入「心流」狀態，高效完成剩餘任務。",
     icon: "🎧",
   },
   {
+    time: "17:45",
+    activity: "最後衝刺",
+    description:
+      "突然想起明天的截止日期，開始瘋狂編碼，手指敲鍵盤的速度創下新紀錄。同時感謝AI小助手幫你完成了一半的工作！",
+    icon: "⚡",
+    highlight: true,
+  },
+  {
     time: "18:00",
     activity: "下班，明天見",
-    description: "保存今天的工作，思考未解決的問題，明天繼續挑戰。",
+    description: "保存今天的工作，紀錄未解決的問題，明天繼續挑戰。",
     icon: "👋",
   },
 ];
@@ -261,8 +294,16 @@ export default function App() {
                     <div className="text-gray-400 font-mono">{item.time}</div>
                   </div>
                   <div className="ml-4 flex-1">
-                    <div className="h-full border-l-2 border-purple-500 pl-4">
-                      <h4 className="text-lg font-semibold text-purple-300">
+                    <div
+                      className={`h-full border-l-2 ${
+                        item.highlight ? "border-pink-500" : "border-purple-500"
+                      } pl-4`}
+                    >
+                      <h4
+                        className={`text-lg font-semibold ${
+                          item.highlight ? "text-pink-300" : "text-purple-300"
+                        }`}
+                      >
                         {item.activity}
                       </h4>
                       <p className="text-gray-300 mt-1">{item.description}</p>
